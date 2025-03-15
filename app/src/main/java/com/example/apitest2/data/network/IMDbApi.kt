@@ -1,5 +1,6 @@
-package com.example.apitest2
+package com.example.apitest2.data.network
 
+import com.example.apitest2.data.dto.MoviesResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

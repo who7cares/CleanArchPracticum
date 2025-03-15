@@ -1,4 +1,4 @@
-package com.example.apitest2
+package com.example.apitest2.ui.movies
 
 import android.app.Activity
 import android.content.Intent
@@ -8,13 +8,17 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.apitest2.ui.poster.PosterActivity
+import com.example.apitest2.R
+import com.example.apitest2.data.dto.MoviesResponse
+import com.example.apitest2.data.network.IMDbApi
+import com.example.apitest2.domain.models.Movie
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

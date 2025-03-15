@@ -1,8 +1,8 @@
-package com.example.apitest2
+package com.example.apitest2.ui.movies
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.apitest2.domain.models.Movie
 
 class MoviesAdapter (private val clickListener: MovieClickListener) : RecyclerView.Adapter<MovieViewHolder>() {
 
