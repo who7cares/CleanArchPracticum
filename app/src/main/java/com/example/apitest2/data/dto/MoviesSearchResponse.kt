@@ -4,5 +4,5 @@ import com.example.apitest2.domain.models.Movie
 
 class MoviesResponse(val searchType: String,
                      val expression: String,
-                     val results: List<Movie>)  {
+                     val results: List<Movie>) : Response()  {
 }
