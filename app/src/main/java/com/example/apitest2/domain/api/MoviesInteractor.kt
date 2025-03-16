@@ -10,3 +10,4 @@ interface MoviesInteractor {
         fun consume(foundMovies: List<Movie>)
     }
 }
+

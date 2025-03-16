@@ -9,12 +9,12 @@ class MoviesRepositoryImpl(private val networkClient: NetworkClient) : MoviesRep
 
     override fun searchMovies(expression: String): List<Movie> {
         val response = networkClient.doRequest(MovieSearchRequest(expression))
-        if (response.resultCode == 200) {
-            return (response as MoviesSearchResponse).results.map {
+        return if (response.resultCode == 200) {
+            (response as MoviesSearchResponse).results.map {
                 Movie( it.id, it.resultType, it.image, it.title, it.description)
             }
-            } else {
-                return emptyList()
+        } else {
+            emptyList()
         }
     }
 }

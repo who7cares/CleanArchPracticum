@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
-import com.example.apitest2.data.dto.MoviesResponse
+import com.example.apitest2.data.dto.MovieDto
+import com.example.apitest2.data.dto.MoviesSearchResponse
+
 import com.example.apitest2.data.network.IMDbApi
 import com.example.apitest2.domain.models.Movie
 import retrofit2.Call
@@ -135,9 +137,9 @@ class MainActivity : Activity() {
             progressBar.visibility = View.VISIBLE
 
             imdbService.findMovie(queryInput.text.toString()).enqueue(object :
-                Callback<MoviesResponse> {
-                override fun onResponse(call: Call<MoviesResponse>,
-                                        response: Response<MoviesResponse>
+                Callback<MoviesSearchResponse> {
+                override fun onResponse(call: Call<MoviesSearchResponse>,
+                                        response: Response<MoviesSearchResponse>
                 ) {
                     progressBar.visibility = View.GONE
                     if (response.code() == 200) {
@@ -157,7 +159,7 @@ class MainActivity : Activity() {
                     }
                 }
 
-                override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+                override fun onFailure(call: Call<MoviesSearchResponse>, t: Throwable) {
                     progressBar.visibility = View.GONE
                     showMessage("что-то пошло не так", t.message.toString())
                 }

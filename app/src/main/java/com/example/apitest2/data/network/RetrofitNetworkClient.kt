@@ -20,9 +20,10 @@ class RetrofitNetworkClient : NetworkClient {
 
     override fun doRequest(dto: Any): Response {
        if (dto is MovieSearchRequest) {
-           val resp = imdbService.findMovie(dto.expression).execute()
+           val call = imdbService.findMovie(dto.expression) // Call<MoviesSearchResponse>
+           val resp = call.execute() // Response<MoviesSearchResponse> - возвращает HTTP response из библиотеки ретрофита (Это НЕ созданный нами Response!!!)
 
-           val body = resp.body() ?: Response()
+           val body = resp.body() ?: Response()   // возвращает MoviesSearchResponse?. В случае null - присваивается уже созданный нами класс Response
 
            return body.apply { resultCode = resp.code() }
        } else {
