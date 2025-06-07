@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -17,18 +18,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.Creator
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
-import com.example.apitest2.data.dto.MovieDto
-import com.example.apitest2.data.dto.MoviesSearchResponse
 
-import com.example.apitest2.data.network.IMDbApi
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
+private const val TAG = "MainActivity"
 
 class MainActivity : Activity() {
     
@@ -63,6 +57,8 @@ class MainActivity : Activity() {
 
     
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "был проинициализирован moviesInteractor = $moviesInteractor") // почему никак не отображается в логах
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -128,21 +124,25 @@ class MainActivity : Activity() {
 
 
     private fun searchRequest() {
+        Log.d(TAG, "Запущенна функция searchRequest()")
         if (queryInput.text.isNotEmpty()) {
 
             placeholderMessage.visibility = View.GONE
             moviesList.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
 
-            moviesInteractor.searchMovies(
+            moviesInteractor.searchMoviesInt(
                 queryInput.text.toString(), object : MoviesInteractor.MoviesConsumer {
                     override fun consume(foundMovies: List<Movie>) {
+                        Log.d(TAG, "Запущенна consume со значением queryInput = ${queryInput.text.toString()} ")
                         handler.post {
                             progressBar.visibility = View.GONE
                             movies.clear()
                             movies.addAll(foundMovies)
                             moviesList.visibility = View.VISIBLE
                             adapter.notifyDataSetChanged()
+
+                            Log.d(TAG, "Формирование списка фильмов завершено")
                             if (movies.isEmpty()) {
                                 showMessage("Ничего не нашлось", "")
                             } else {
