@@ -12,7 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.apitest2.Creator
+import com.example.apitest2.util.Creator
 import com.example.apitest2.R
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
@@ -24,7 +24,7 @@ class MoviesSearchController(
     private val adapter: MoviesAdapter
 ) {
 
-    private val moviesInteractor = Creator.provideMoviesInteractor()
+    private val moviesInteractor = Creator.provideMoviesInteractor(activity)
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
@@ -83,15 +83,21 @@ class MoviesSearchController(
             progressBar.visibility = View.VISIBLE
 
             moviesInteractor.searchMoviesInt(queryInput.text.toString(), object : MoviesInteractor.MoviesConsumer {
-                override fun consume(foundMovies: List<Movie>) {
+                override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
                     handler.post {
                         progressBar.visibility = View.GONE
-                        movies.clear()
-                        movies.addAll(foundMovies)
-                        moviesList.visibility = View.VISIBLE
-                        adapter.notifyDataSetChanged()
-                        if (movies.isEmpty()) {
-                            showMessage("Ничего не найдено","")
+
+                        if (foundMovies != null) {
+                            movies.clear()
+                            movies.addAll(foundMovies)
+                            adapter.notifyDataSetChanged()
+                            moviesList.visibility = View.VISIBLE
+                        }
+
+                        if (errorMessage != null) {
+                            showMessage("Что-то пошло не так", errorMessage)
+                        } else if (movies.isEmpty()) {
+                            showMessage("Ничего не найдено", "")
                         } else {
                             hideMessage()
                         }

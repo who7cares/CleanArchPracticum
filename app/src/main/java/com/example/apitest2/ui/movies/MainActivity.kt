@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import com.example.apitest2.Creator
+import com.example.apitest2.util.Creator
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
 

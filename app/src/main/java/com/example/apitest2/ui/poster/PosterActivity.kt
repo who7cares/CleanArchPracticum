@@ -2,7 +2,7 @@ package com.example.apitest2.ui.poster
 
 import android.app.Activity
 import android.os.Bundle
-import com.example.apitest2.Creator
+import com.example.apitest2.util.Creator
 import com.example.apitest2.R
 
 class PosterActivity : Activity() {
