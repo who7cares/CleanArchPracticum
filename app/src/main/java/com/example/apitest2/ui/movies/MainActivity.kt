@@ -22,7 +22,6 @@ import com.example.apitest2.R
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
 
-private const val TAG = "MainActivity"
 
 class MainActivity : Activity() {
     
@@ -57,8 +56,6 @@ class MainActivity : Activity() {
 
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "был проинициализирован moviesInteractor = $moviesInteractor") // почему никак не отображается в логах
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -124,7 +121,6 @@ class MainActivity : Activity() {
 
 
     private fun searchRequest() {
-        Log.d(TAG, "Запущенна функция searchRequest()")
         if (queryInput.text.isNotEmpty()) {
 
             placeholderMessage.visibility = View.GONE
@@ -134,7 +130,6 @@ class MainActivity : Activity() {
             moviesInteractor.searchMoviesInt(
                 queryInput.text.toString(), object : MoviesInteractor.MoviesConsumer {
                     override fun consume(foundMovies: List<Movie>) {
-                        Log.d(TAG, "Запущенна consume со значением queryInput = ${queryInput.text.toString()} ")
                         handler.post {
                             progressBar.visibility = View.GONE
                             movies.clear()
@@ -142,7 +137,6 @@ class MainActivity : Activity() {
                             moviesList.visibility = View.VISIBLE
                             adapter.notifyDataSetChanged()
 
-                            Log.d(TAG, "Формирование списка фильмов завершено")
                             if (movies.isEmpty()) {
                                 showMessage("Ничего не нашлось", "")
                             } else {
