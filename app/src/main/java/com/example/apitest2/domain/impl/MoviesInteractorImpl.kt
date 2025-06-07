@@ -8,9 +8,9 @@ class MoviesInteractorImpl(private val repository: MoviesRepository) : MoviesInt
 
     private val executor = Executors.newCachedThreadPool()
 
-    override fun searchMovies(espression: String, consumer: MoviesInteractor.MoviesConsumer) {
+    override fun searchMovies(expression: String, consumer: MoviesInteractor.MoviesConsumer) {
         executor.execute {
-            consumer.consume(repository.searchMovies(espression))
+            consumer.consume(repository.searchMovies(expression))
         }
     }
 }

@@ -14,12 +14,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.apitest2.Creator
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
 import com.example.apitest2.data.dto.MovieDto
 import com.example.apitest2.data.dto.MoviesSearchResponse
 
 import com.example.apitest2.data.network.IMDbApi
+import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
 import retrofit2.Call
 import retrofit2.Callback
@@ -29,30 +31,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : Activity() {
+    
+    private val moviesInteractor = Creator.provideMoviesInteractor()
 
-    private val imdbBaseUrl = "https://tv-api.com"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(imdbBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
-
-    private val imdbService = retrofit.create(IMDbApi::class.java)
-
+    
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
     private lateinit var moviesList: RecyclerView
-
     private lateinit var progressBar: ProgressBar
-    private var isClickAllowed = true
-    private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable { searchRequest() }
-
 
     private val movies = ArrayList<Movie>()
 
@@ -63,7 +54,14 @@ class MainActivity : Activity() {
             startActivity(intent)
         }
     }
+    
+    private var isClickAllowed = true
+    
+    private val handler = Handler(Looper.getMainLooper())
+    
+    private val searchRunnable = Runnable { searchRequest() }
 
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -131,46 +129,40 @@ class MainActivity : Activity() {
 
     private fun searchRequest() {
         if (queryInput.text.isNotEmpty()) {
-            moviesList.visibility = View.GONE
+
             placeholderMessage.visibility = View.GONE
             moviesList.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
 
-            imdbService.findMovie(queryInput.text.toString()).enqueue(object :
-                Callback<MoviesSearchResponse> {
-                override fun onResponse(call: Call<MoviesSearchResponse>,
-                                        response: Response<MoviesSearchResponse>
-                ) {
-                    progressBar.visibility = View.GONE
-                    if (response.code() == 200) {
-                        movies.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
+            moviesInteractor.searchMovies(
+                queryInput.text.toString(), object : MoviesInteractor.MoviesConsumer {
+                    override fun consume(foundMovies: List<Movie>) {
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            movies.clear()
+                            movies.addAll(foundMovies)
                             moviesList.visibility = View.VISIBLE
-                            movies.addAll(response.body()?.results!!)
                             adapter.notifyDataSetChanged()
+                            if (movies.isEmpty()) {
+                                showMessage("Ничего не нашлось", "")
+                            } else {
+                                hideMessage()
+                            }
                         }
-                        if (movies.isEmpty()) {
-                            showMessage("ничего не найдено", "")
-                        } else {
-                            placeholderMessage.visibility = View.GONE
-                        }
-                    } else {
-                        showMessage("что-то пошло не так", response.code().toString())
                     }
-                }
 
-                override fun onFailure(call: Call<MoviesSearchResponse>, t: Throwable) {
-                    progressBar.visibility = View.GONE
-                    showMessage("что-то пошло не так", t.message.toString())
-                }
-
-            })
+                })
         }
     }
+
 
     private fun searchDebounce() {
         handler.removeCallbacks(searchRunnable)
         handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun hideMessage() {
+        placeholderMessage.visibility = View.GONE
     }
 
 }
