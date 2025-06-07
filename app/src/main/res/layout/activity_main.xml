@@ -23,7 +23,8 @@
             android:indeterminateTint="@color/black"
             android:visibility="gone"/>
 
-        <androidx.recyclerview.widget.RecyclerView android:id="@+id/movies"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/movies"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 

@@ -1,27 +1,34 @@
 package com.example.apitest2.presentation
 
+import android.app.Activity
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.Creator
+import com.example.apitest2.R
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
+import com.example.apitest2.ui.movies.MoviesAdapter
 
 /*
-Итак, мы перенесли сюда весь код, который связан с поиском фильмов и отображением результатов, в том числе работу с интерактором. Однако есть несколько проблем:
-1. View-элементы не проинициализированы.
-2. Не хватает ссылки на адаптер для RecyclerView. Мы оставили инициализацию этого объекта в MoviesActivity, поскольку в конструктор адаптера передаётся MovieClickListener, использующийся для навигации.
-3. Полю для ввода поискового запроса надо установить TextWatcher, в котором можно вызвать метод searchDebounce().
-
-Мы могли передать контроллеру уже проинициализированные View-элементы, но это всё ещё нарушения инверсии зависимости. Точно такое же нарушение, как если бы мы передали контроллеру ссылку на саму Activity и проинициализировали элементы интерфейса непосредственно в контроллере.
+Поэтому поступим следующим образом:
+1. Обозначим в конструкторе необходимость передачи экземпляра Activity. Его сможет передавать любая активити с таким же файлом вёрстки, если в ней потребуется использовать такой контроллер.
+2. Проинициализированный в активити адаптер также будем передавать в конструкторе.
+3. Создадим два метода, которые активити будет вызывать в onCreate() и onDestroy(). Так контроллер узнает, когда инициализировать View-элементы и отменить отложенную отправку поискового запроса, если вдруг активити закроется. Для удобства назовём эти методы так же.
  */
 
-class MoviesSearchController() {
+class MoviesSearchController(
+    private val activity: Activity,
+    private val adapter: MoviesAdapter
+) {
 
     private val moviesInteractor = Creator.provideMoviesInteractor()
 
@@ -39,6 +46,35 @@ class MoviesSearchController() {
     private val handler = Handler(Looper.getMainLooper())
 
     private val searchRunnable = Runnable { searchRequest() }
+
+    fun onCreate() {
+        placeholderMessage = activity.findViewById(R.id.placeholderMessage)
+        queryInput = activity.findViewById(R.id.queryInput)
+        moviesList = activity.findViewById(R.id.movies)
+        progressBar = activity.findViewById(R.id.progressBar)
+
+        adapter.movies = movies
+
+        moviesList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        moviesList.adapter = adapter
+
+        queryInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchDebounce()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        })
+    }
+
+    fun onDestroy() {
+        handler.removeCallbacks(searchRunnable)
+    }
 
     private fun searchDebounce() {
         handler.removeCallbacks(searchRunnable)
@@ -61,7 +97,7 @@ class MoviesSearchController() {
                         moviesList.visibility = View.VISIBLE
                         adapter.notifyDataSetChanged()
                         if (movies.isEmpty()) {
-                            showMessage(activity.getString("Ничего не найдено", ""))
+                            showMessage("Ничего не найдено","")
                         } else {
                             hideMessage()
                         }
