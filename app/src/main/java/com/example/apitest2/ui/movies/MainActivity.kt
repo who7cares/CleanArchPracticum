@@ -11,11 +11,13 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.util.Creator
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
+import com.example.apitest2.domain.models.Movie
 import com.example.apitest2.presentation.movies.MoviesView
 
 
@@ -33,7 +35,9 @@ class MainActivity : Activity(), MoviesView {
         }
     }
 
-    private val moviesSearchPresenter = Creator.provideMoviesSearchPresenter(this, this,  adapter)
+    private val moviesSearchPresenter = Creator.provideMoviesSearchPresenter(
+        moviesView = this,
+        context = this)
 
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
@@ -77,7 +81,7 @@ class MainActivity : Activity(), MoviesView {
 
         textWatcher?.let { queryInput.addTextChangedListener(it) }
 
-        moviesSearchPresenter.onCreate()
+
     }
 
     override fun onDestroy() {
@@ -110,6 +114,17 @@ class MainActivity : Activity(), MoviesView {
 
     override fun changePlaceholderText(newPlaceholderText: String) {
         placeholderMessage.text = newPlaceholderText
+    }
+
+    override fun updateMoviesList(newMoviesList: List<Movie>) {
+        adapter.movies.clear()
+        adapter.movies.addAll(newMoviesList)
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun showToast(additionalMessage: String) {
+        Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG)
+            .show()
     }
 
 }
