@@ -1,23 +1,12 @@
 package com.example.apitest2.presentation.movies
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.View
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.util.Creator
-import com.example.apitest2.R
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
-import com.example.apitest2.ui.movies.MoviesAdapter
+
 
 
 class MoviesSearchPresenter(
