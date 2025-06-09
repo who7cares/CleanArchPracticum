@@ -19,6 +19,7 @@ import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
 import com.example.apitest2.domain.models.Movie
 import com.example.apitest2.presentation.movies.MoviesView
+import com.example.apitest2.ui.models.MoviesState
 
 
 class MainActivity : Activity(), MoviesView {
@@ -91,7 +92,7 @@ class MainActivity : Activity(), MoviesView {
     }
 
 
-    private fun clickDebounce() : Boolean {
+    private fun clickDebounce(): Boolean {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
@@ -100,13 +101,13 @@ class MainActivity : Activity(), MoviesView {
         return current
     }
 
-     fun showLoading() {
+    private fun showLoading() {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
     }
 
-     fun showError(erorrMessage: String) {
+    private fun showError(erorrMessage: String) {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
@@ -114,11 +115,11 @@ class MainActivity : Activity(), MoviesView {
         placeholderMessage.text = erorrMessage
     }
 
-     fun showEmpty(emptyMessage: String) {
+    private fun showEmpty(emptyMessage: String) {
         showError(emptyMessage)
     }
 
-    fun showContent(movies: List<Movie>) {
+    private fun showContent(movies: List<Movie>) {
         moviesList.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
@@ -129,10 +130,11 @@ class MainActivity : Activity(), MoviesView {
     }
 
     override fun render(state: MoviesState) {
-        when {
-            state.isLoading -> showLoading()
-            state.errorMessage != null -> showError(state.errorMessage)
-            else -> showContent(state.movies)
+        when (state) {
+            is MoviesState.Content -> showContent(state.movies)
+            is MoviesState.Empty -> showEmpty(state.message)
+            is MoviesState.Error -> showError(state.errorMessage)
+            is MoviesState.Loading -> showLoading()
         }
     }
 

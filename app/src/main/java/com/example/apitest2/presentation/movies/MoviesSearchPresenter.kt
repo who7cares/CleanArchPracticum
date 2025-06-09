@@ -6,7 +6,7 @@ import android.os.Looper
 import com.example.apitest2.util.Creator
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
-import com.example.apitest2.ui.movies.MoviesState
+import com.example.apitest2.ui.models.MoviesState
 
 
 class MoviesSearchPresenter(
@@ -45,11 +45,7 @@ class MoviesSearchPresenter(
         if (newSearchText.isNotEmpty()) {
 
             view.render(
-                MoviesState(
-                    movies = movies,
-                    isLoading = true,
-                    errorMessage = null
-                )
+               MoviesState.Loading
             )
 
             moviesInteractor.searchMoviesInt(newSearchText, object : MoviesInteractor.MoviesConsumer {
@@ -65,33 +61,23 @@ class MoviesSearchPresenter(
                         when {
                             errorMessage != null -> {
                                 view.render(
-                                    MoviesState(
-                                        movies = emptyList(),
-                                        isLoading = false,
-                                        errorMessage = errorMessage
-                                    )
+                                    MoviesState.Error("Опаньки")
                                 )
                                 view.showToast(errorMessage)
                             }
 
                             movies.isEmpty() -> {
                                 view.render(
-                                    MoviesState(
-                                        movies = emptyList(),
-                                        isLoading = false,
-                                        errorMessage = "Ничего не найдено"
-                                    )
+                                    MoviesState.Empty("Ничего не найдено")
                                 )
                             }
 
                             else -> {
                                 view.render(
-                                    MoviesState(
-                                        movies = movies,
-                                        isLoading = false,
-                                        errorMessage = null
-                                    )
+                                    MoviesState.Content(movies = movies)
                                 )
+
+                                view.showToast("Вот тебе список фильмов амиго")
                             }
                         }
 
