@@ -11,13 +11,13 @@ import com.example.apitest2.domain.models.Movie
 
 class MoviesSearchPresenter(
     private val view: MoviesView,
-    private val context: Context,
+    context: Context,
 ) {
 
     private val moviesInteractor = Creator.provideMoviesInteractor(context)
     private val handler = Handler(Looper.getMainLooper())
 
-    private var lastSearchText: String? = null
+    private var lastSearchText: String = ""
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
@@ -27,11 +27,8 @@ class MoviesSearchPresenter(
     private val movies = ArrayList<Movie>()
 
     private val searchRunnable = Runnable {
-        val newSearchText = lastSearchText ?: ""
-        searchRequest(newSearchText)
+        searchRequest(lastSearchText)
     }
-
-
 
 
     fun onDestroy() {
@@ -39,7 +36,7 @@ class MoviesSearchPresenter(
     }
 
     fun searchDebounce(changedText: String) {
-        this.lastSearchText = changedText
+        lastSearchText = changedText
         handler.removeCallbacks(searchRunnable)
         handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
@@ -47,32 +44,34 @@ class MoviesSearchPresenter(
     private fun searchRequest(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
 
-            // Заменили работу с элементами UI на
-            // вызовы методов интерфейса MoviesView
-            view.showPlaceholderMessage(false)
-            view.showMoviesList(false)
-            view.showProgressBar(true)
+            view.showLoading()
 
             moviesInteractor.searchMoviesInt(newSearchText, object : MoviesInteractor.MoviesConsumer {
                 override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
                     handler.post {
-                        view.showProgressBar(false)
 
                         if (foundMovies != null) {
                             movies.clear()
                             movies.addAll(foundMovies)
-                            view.updateMoviesList(movies)
-
-                            view.showMoviesList(true)
                         }
 
-                        if (errorMessage != null) {
-                            showMessage("Что-то пошло не так", errorMessage)
-                        } else if (movies.isEmpty()) {
-                            showMessage("Ничего не найдено", "")
-                        } else {
-                            hideMessage()
+
+                        when {
+                            errorMessage != null -> {
+                                view.showError("что-то пошло не так")
+                                view.showToast(errorMessage)
+                            }
+
+                            movies.isEmpty() -> {
+                                view.showEmpty("Ничего не найдено")
+                            }
+
+                            else -> {
+                                view.showContent(movies)
+                            }
                         }
+
+
                     }
                 }
 
@@ -80,24 +79,4 @@ class MoviesSearchPresenter(
         }
     }
 
-    private fun showMessage(text: String, additionalMessage: String) {
-        if (text.isNotEmpty()) {
-            view.showPlaceholderMessage(true)
-
-            movies.clear()
-            view.updateMoviesList(movies)
-
-            view.changePlaceholderText(text)
-
-            if (additionalMessage.isNotEmpty()) {
-                view.showToast(additionalMessage)
-            }
-        } else {
-            view.showPlaceholderMessage(false)
-        }
-    }
-
-    private fun hideMessage() {
-        view.showPlaceholderMessage(false)
-    }
 }

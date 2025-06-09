@@ -4,15 +4,22 @@ import com.example.apitest2.domain.models.Movie
 
 interface MoviesView {
 
-    fun showPlaceholderMessage(isVisible: Boolean)
+    // Методы, меняющие внешний вид экрана
 
-    fun showMoviesList(isVisible: Boolean)
+    // состояние загрузки
+    fun showLoading()
 
-    fun showProgressBar(isVisible: Boolean)
+    // состояние ошибки
+    fun showError(erorrMessage: String)
 
-    fun changePlaceholderText(newPlaceholderText: String)
+    // состояние пустого списка
+    fun showEmpty(emptyMessage: String)
 
-    fun updateMoviesList(newMoviesList: List<Movie>)
+    // состояние контента
+    fun showContent(movies: List<Movie>)
+
+
+    // Методы одноразовых событий»
 
     fun showToast(additionalMessage: String)
 
