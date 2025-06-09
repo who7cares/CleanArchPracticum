@@ -6,7 +6,7 @@ import android.os.Looper
 import com.example.apitest2.util.Creator
 import com.example.apitest2.domain.api.MoviesInteractor
 import com.example.apitest2.domain.models.Movie
-
+import com.example.apitest2.ui.movies.MoviesState
 
 
 class MoviesSearchPresenter(
@@ -44,7 +44,13 @@ class MoviesSearchPresenter(
     private fun searchRequest(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
 
-            view.showLoading()
+            view.render(
+                MoviesState(
+                    movies = movies,
+                    isLoading = true,
+                    errorMessage = null
+                )
+            )
 
             moviesInteractor.searchMoviesInt(newSearchText, object : MoviesInteractor.MoviesConsumer {
                 override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
@@ -58,16 +64,34 @@ class MoviesSearchPresenter(
 
                         when {
                             errorMessage != null -> {
-                                view.showError("что-то пошло не так")
+                                view.render(
+                                    MoviesState(
+                                        movies = emptyList(),
+                                        isLoading = false,
+                                        errorMessage = errorMessage
+                                    )
+                                )
                                 view.showToast(errorMessage)
                             }
 
                             movies.isEmpty() -> {
-                                view.showEmpty("Ничего не найдено")
+                                view.render(
+                                    MoviesState(
+                                        movies = emptyList(),
+                                        isLoading = false,
+                                        errorMessage = "Ничего не найдено"
+                                    )
+                                )
                             }
 
                             else -> {
-                                view.showContent(movies)
+                                view.render(
+                                    MoviesState(
+                                        movies = movies,
+                                        isLoading = false,
+                                        errorMessage = null
+                                    )
+                                )
                             }
                         }
 

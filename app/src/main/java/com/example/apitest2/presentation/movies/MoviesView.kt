@@ -1,22 +1,14 @@
 package com.example.apitest2.presentation.movies
 
 import com.example.apitest2.domain.models.Movie
+import com.example.apitest2.ui.movies.MoviesState
 
 interface MoviesView {
 
     // Методы, меняющие внешний вид экрана
 
-    // состояние загрузки
-    fun showLoading()
 
-    // состояние ошибки
-    fun showError(erorrMessage: String)
-
-    // состояние пустого списка
-    fun showEmpty(emptyMessage: String)
-
-    // состояние контента
-    fun showContent(movies: List<Movie>)
+    fun render(state: MoviesState)
 
 
     // Методы одноразовых событий»
