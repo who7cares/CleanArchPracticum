@@ -3,15 +3,16 @@ package com.example.apitest2.ui.poster
 import android.app.Activity
 import android.os.Bundle
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.apitest2.util.Creator
 import com.example.apitest2.R
-import com.example.apitest2.presentation.poster.PosterPresenter
-import com.example.apitest2.presentation.poster.PosterView
+import com.example.apitest2.presentation.poster.PosterViewModel
 
-class PosterActivity : Activity(), PosterView {
+class PosterActivity : AppCompatActivity() {
 
-    private lateinit var posterPresenter: PosterPresenter
+    private var viewModel: PosterViewModel? = null
 
     private lateinit var poster: ImageView
 
@@ -24,14 +25,17 @@ class PosterActivity : Activity(), PosterView {
 
         val imgUrl = intent.extras?.getString("poster", "") ?: ""
 
-        posterPresenter = Creator.providePosterPresenter(this, imgUrl)
 
-        posterPresenter.onCreate()
+        viewModel = ViewModelProvider(this, PosterViewModel.getFactory(imgUrl))
+            .get(PosterViewModel::class.java)
 
+        viewModel?.observeUrl()?.observe(this) {
+            setupPosterImage(it)
+        }
 
     }
 
-    override fun setupPosterImage(url: String) {
+    private fun setupPosterImage(url: String) {
         Glide.with(applicationContext)
             .load(url)
             .into(poster)
