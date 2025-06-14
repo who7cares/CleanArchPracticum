@@ -12,6 +12,8 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.apitest2.MoviesApplication
@@ -19,18 +21,19 @@ import com.example.apitest2.util.Creator
 import com.example.apitest2.ui.poster.PosterActivity
 import com.example.apitest2.R
 import com.example.apitest2.domain.models.Movie
-import com.example.apitest2.presentation.movies.MoviesSearchPresenter
-import com.example.apitest2.presentation.movies.MoviesView
+import com.example.apitest2.presentation.movies.MoviesViewModel
 import com.example.apitest2.ui.models.MoviesState
 
 
-class MainActivity : Activity(), MoviesView {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
-    private val adapter = MoviesAdapter{
+    private var viewModel: MoviesViewModel? = null
+
+    private val adapter = MoviesAdapter {
         if (clickDebounce()) {
             val intent = Intent(this, PosterActivity::class.java)
             intent.putExtra("poster", it.image)
@@ -38,7 +41,6 @@ class MainActivity : Activity(), MoviesView {
         }
     }
 
-    private var moviesSearchPresenter: MoviesSearchPresenter? = null
 
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
@@ -52,29 +54,9 @@ class MainActivity : Activity(), MoviesView {
     private val handler = Handler(Looper.getMainLooper())
 
 
-    override fun onStart() {
-        super.onStart()
-        moviesSearchPresenter?.attachView(this)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        moviesSearchPresenter?.attachView(this)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        moviesSearchPresenter = (this.application as? MoviesApplication)?.moviesSearchPresenter
-
-        if(moviesSearchPresenter == null) {
-            moviesSearchPresenter = Creator.provideMoviesSearchPresenter(
-                context = this.applicationContext
-            )
-            (this.applicationContext as? MoviesApplication)?.moviesSearchPresenter = moviesSearchPresenter
-        }
-
 
         placeholderMessage = findViewById(R.id.placeholderMessage)
         queryInput = findViewById(R.id.queryInput)
@@ -84,20 +66,28 @@ class MainActivity : Activity(), MoviesView {
         moviesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         moviesList.adapter = adapter
 
+        viewModel = ViewModelProvider(this, MoviesViewModel.getFactory())
+            .get(MoviesViewModel::class.java)
+
+        viewModel?.observeState()?.observe(this) {
+            render(it)
+        }
+
+        viewModel?.observeShowToast()?.observe(this) {
+            showToast(it)
+        }
+
 
         textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter!!.searchDebounce(
+                viewModel?.searchDebounce(
                     changedText = s?.toString() ?: ""
                 )
             }
 
-            override fun afterTextChanged(s: Editable?) {
-            }
+            override fun afterTextChanged(s: Editable?) {}
         }
 
         textWatcher?.let { queryInput.addTextChangedListener(it) }
@@ -106,30 +96,10 @@ class MainActivity : Activity(), MoviesView {
     }
 
 
-    override fun onPause() {
-        super.onPause()
-        moviesSearchPresenter?.detachView()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        moviesSearchPresenter?.detachView()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        moviesSearchPresenter?.detachView()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        moviesSearchPresenter?.detachView()
-        textWatcher?.let { queryInput.removeTextChangedListener(it) }
-        moviesSearchPresenter?.onDestroy()
-
-        if (isFinishing()) {
-            // Очищаем ссылку на Presenter в Application
-            (this.application as? MoviesApplication)?.moviesSearchPresenter = null
+        textWatcher?.let {
+            queryInput.removeTextChangedListener(it)
         }
     }
 
@@ -171,7 +141,7 @@ class MainActivity : Activity(), MoviesView {
         adapter.notifyDataSetChanged()
     }
 
-    override fun render(state: MoviesState) {
+    private fun render(state: MoviesState) {
         when (state) {
             is MoviesState.Content -> showContent(state.movies)
             is MoviesState.Empty -> showEmpty(state.message)
@@ -181,14 +151,12 @@ class MainActivity : Activity(), MoviesView {
     }
 
 
-    override fun showToast(additionalMessage: String) {
+    private fun showToast(additionalMessage: String?) {
         Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG)
             .show()
     }
 
 
-
-
-
 }
+
 
