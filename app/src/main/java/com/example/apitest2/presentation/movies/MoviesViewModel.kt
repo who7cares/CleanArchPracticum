@@ -1,6 +1,7 @@
 package com.example.apitest2.presentation.movies
 
 import android.content.Context
+import android.icu.text.SearchIterator
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.apitest2.MoviesApplication
 import com.example.apitest2.domain.api.MoviesInteractor
+import com.example.apitest2.domain.api.SearchHistoryInteractor
 import com.example.apitest2.domain.models.Movie
 import com.example.apitest2.ui.models.MoviesState
 import com.example.apitest2.util.Creator
@@ -38,8 +40,12 @@ class MoviesViewModel(context: Context): ViewModel() {
     private val showToast = SingleLiveEvent<String?>()
     fun observeShowToast(): LiveData<String?> = showToast
 
+    private val historyMovies = MutableLiveData<List<Movie>>()
+    fun observeHistoryMovies(): LiveData<List<Movie>> = historyMovies
+
 
     private val moviesInteractor = Creator.provideMoviesInteractor(context)
+    private val historyMoviesInteractor = Creator.provideSearchHistoryInteractor(context)
 
     private var lastSearchText: String = ""
 
@@ -62,6 +68,21 @@ class MoviesViewModel(context: Context): ViewModel() {
             SEARCH_REQUEST_TOKEN,
             postTime,
         )
+
+    }
+
+     fun loadHistory() {
+        historyMoviesInteractor.getHistory(
+            object : SearchHistoryInteractor.HistoryConsumer {
+                override fun consume(searchHistory: List<Movie>?) {
+                    historyMovies.postValue(searchHistory ?: emptyList())
+                }
+            }
+        )
+    }
+
+     fun saveToHistory(movie: Movie){
+        historyMoviesInteractor.saveToHistory(movie)
 
     }
 

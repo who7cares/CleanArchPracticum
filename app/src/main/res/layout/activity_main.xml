@@ -4,14 +4,33 @@
     android:orientation="vertical"
     android:background="@color/white">
 
-    <EditText android:id="@+id/queryInput"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_gravity="center_vertical"
-        android:textColor="@color/black"
-        android:imeOptions="actionDone"
-        android:singleLine="true"/>
+        android:orientation="horizontal"
+        android:background="@color/warm_peach" >
+
+        <EditText android:id="@+id/queryInput"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/black"
+            android:imeOptions="actionDone"
+            android:singleLine="true"/>
+
+        <Button
+            android:id="@+id/show_movies"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Показать\nфильмы"
+            android:maxLines="2"
+            android:layout_gravity="center_vertical" />
+
+
+    </LinearLayout>
 
     <FrameLayout android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -27,6 +46,12 @@
             android:id="@+id/movies"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fav_movies"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
 
         <TextView android:id="@+id/placeholderMessage"
             android:layout_width="300dp"

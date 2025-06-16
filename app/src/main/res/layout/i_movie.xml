@@ -35,5 +35,14 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="italic"/>
+
+        <Button
+            android:id="@+id/save_to_fav"
+            android:text="Сохранить в избранное"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="25dp" />
+
     </LinearLayout>
 </LinearLayout>

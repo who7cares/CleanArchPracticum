@@ -1,12 +1,11 @@
 package com.example.apitest2.ui.poster
 
-import android.app.Activity
+
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.example.apitest2.util.Creator
 import com.example.apitest2.R
 import com.example.apitest2.presentation.poster.PosterViewModel
 
